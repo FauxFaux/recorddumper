@@ -1,0 +1,4 @@
+Take each line from a bunch of gzipped files, generate a URI, and send it over XDBC (to e.g. MarkLogic).
+
+No configuration.  Just a hacky script; feel free to add configurability while editing it.
+
