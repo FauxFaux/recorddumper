@@ -34,13 +34,10 @@ public class RecordDumper {
 
     private static final int BLOCK = 500;
     private final ThreadLocal<Session> session;
-    private ContentCreateOptions options = null;
     private final long start = System.currentTimeMillis();
 
     public RecordDumper(URI serverUri) throws XccConfigException {
         final ContentSource cs = ContentSourceFactory.newContentSource(serverUri);
-        options = new ContentCreateOptions();
-        options.setFormat(DocumentFormat.XML);
 
         session = new ThreadLocal<Session>() {
             protected Session initialValue() {
@@ -76,7 +73,13 @@ public class RecordDumper {
                     try {
                         String s;
                         while (null != (s = r.readLine())) {
-                            l.add(ContentFactory.newContent(uriOf(s), s, options));
+                            final String uri = uriOf(s);
+
+                            final ContentCreateOptions options = new ContentCreateOptions();
+                            options.setFormat(DocumentFormat.XML);
+                            options.setCollections(new String[] { uri.replaceAll("_.*","") });
+
+                            l.add(ContentFactory.newContent(uri, s, options));
                             if (l.size() >= BLOCK) {
                                 executeContents(writers, l);
                             }
