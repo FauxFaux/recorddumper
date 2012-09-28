@@ -18,6 +18,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
@@ -40,6 +42,7 @@ public class RecordDumper {
         final ContentSource cs = ContentSourceFactory.newContentSource(serverUri);
 
         session = new ThreadLocal<Session>() {
+            @Override
             protected Session initialValue() {
                 return cs.newSession();
             }
@@ -47,7 +50,7 @@ public class RecordDumper {
     }
 
 
-    public void load(String... args) throws RequestException, InterruptedException {
+    public void load(List<String> args) throws RequestException, InterruptedException {
         final ExecutorService files = Executors.newFixedThreadPool(4);
         final ExecutorService writers = new ThreadPoolExecutor(10, 10, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(100) {
             @Override
@@ -156,15 +159,19 @@ public class RecordDumper {
         return String.valueOf(GENERATED_ID.incrementAndGet());
     }
 
-    public static void main(String[] args)
+    public static void main(String[] argv)
             throws URISyntaxException, XccConfigException, RequestException, InterruptedException,
             MalformedURLException {
 
-        RecordDumper loader = new RecordDumper(new URI("xcc://loader:loader@localhost:9000"));
-        if (0 == args.length) {
-            System.out.println("usage: file1 [file2..]");
+        final LinkedList<String> args = new LinkedList<String>(Arrays.asList(argv));
+
+        if (args.size() < 2) {
+            System.out.println("usage: uri file1 [file2..]");
+            System.out.println("e.g. xcc://loader:loader@localhost:9000 pips*");
             return;
         }
+
+        final RecordDumper loader = new RecordDumper(new URI(args.removeFirst()));
 
         loader.load(args);
     }
