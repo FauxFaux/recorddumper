@@ -123,7 +123,7 @@ public class RecordDumper {
                     throw e;
                 }
                 final long soFar = written.addAndGet(size);
-                final long target = 24000000l;
+                final long target = 24500000l;
                 final float tps = soFar * 1000.f / (System.currentTimeMillis() - start);
                 System.out.println(Math.round(tps) + " tps, "
                         + Math.round((target - soFar)/tps/60.f) + " mins remain");
